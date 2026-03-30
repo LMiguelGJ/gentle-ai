@@ -57,6 +57,8 @@ func SetupAgentSlug(agent model.AgentID) (string, bool) {
 		// config is injected directly by the engram component. Returning false
 		// here is intentional, not an omission.
 		return "", false
+	case model.AgentTrae:
+		return "trae", true
 	default:
 		return "", false
 	}

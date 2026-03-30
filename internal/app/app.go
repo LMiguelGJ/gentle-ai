@@ -42,6 +42,15 @@ func RunArgs(args []string, stdout io.Writer) error {
 	cli.AppVersion = Version
 	upgrade.AppVersion = Version
 
+	// Handle --skip-upgrade before any other processing.
+	// This must be done before selfUpdate is called so the env var is in place.
+	for _, arg := range args {
+		if arg == "--skip-upgrade" {
+			os.Setenv(envNoSelfUpdate, "1")
+			break
+		}
+	}
+
 	if err := system.EnsureCurrentOSSupported(); err != nil {
 		return err
 	}
