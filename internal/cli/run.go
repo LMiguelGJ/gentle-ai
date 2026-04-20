@@ -76,6 +76,15 @@ func SetCommandOutputStreaming(enabled bool) func() {
 	}
 }
 
+// OverrideUserHomeDirForTest replaces osUserHomeDir for the duration of a test.
+// This is the only correct way to inject a test home directory from outside the
+// cli package, since osUserHomeDir is unexported and cannot be set directly.
+func OverrideUserHomeDirForTest(homeDir string) func() {
+	orig := osUserHomeDir
+	osUserHomeDir = func() (string, error) { return homeDir, nil }
+	return func() { osUserHomeDir = orig }
+}
+
 func RunInstall(args []string, detection system.DetectionResult) (InstallResult, error) {
 	flags, err := ParseInstallFlags(args)
 	if err != nil {

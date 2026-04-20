@@ -39,7 +39,6 @@ func NormalizeInstallFlags(flags InstallFlags, detection system.DetectionResult)
 	if err != nil {
 		return InstallInput{}, err
 	}
-
 	selection.Components = components
 
 	skills, err := normalizeSkills(flags.Skills)
@@ -173,8 +172,6 @@ func defaultAgentsFromDetection(detection system.DetectionResult) []model.AgentI
 			agents = append(agents, model.AgentClaudeCode)
 		case string(model.AgentOpenCode):
 			agents = append(agents, model.AgentOpenCode)
-		case string(model.AgentKilocode):
-			agents = append(agents, model.AgentKilocode)
 		case string(model.AgentGeminiCLI):
 			agents = append(agents, model.AgentGeminiCLI)
 		case string(model.AgentCursor):
@@ -187,12 +184,8 @@ func defaultAgentsFromDetection(detection system.DetectionResult) []model.AgentI
 			agents = append(agents, model.AgentAntigravity)
 		case string(model.AgentWindsurf):
 			agents = append(agents, model.AgentWindsurf)
-		case string(model.AgentKimi):
-			agents = append(agents, model.AgentKimi)
-		case string(model.AgentQwenCode):
-			agents = append(agents, model.AgentQwenCode)
-		case string(model.AgentKiroIDE):
-			agents = append(agents, model.AgentKiroIDE)
+		case string(model.AgentTrae):
+			agents = append(agents, model.AgentTrae)
 		}
 	}
 

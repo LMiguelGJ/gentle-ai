@@ -28,11 +28,13 @@ import (
 var Version = "dev"
 
 var (
-	updateCheckAll           = update.CheckAll
-	updateCheckFiltered      = update.CheckFiltered
-	upgradeExecute           = upgrade.Execute
-	ensureCurrentOSSupported = system.EnsureCurrentOSSupported
-	detectSystem             = system.Detect
+	updateCheckAll      = update.CheckAll
+	updateCheckFiltered = update.CheckFiltered
+	upgradeExecute      = upgrade.Execute
+
+	// osUserHomeDir is injectable for testability on Windows where
+	// osUserHomeDir() uses USERPROFILE, not the HOME env var.
+	osUserHomeDir = os.UserHomeDir
 )
 
 func Run() error {
@@ -44,6 +46,15 @@ func RunArgs(args []string, stdout io.Writer) error {
 	// manifests record which version of gentle-ai created them.
 	cli.AppVersion = Version
 	upgrade.AppVersion = Version
+
+	// Handle --skip-upgrade before any other processing.
+	// This must be done before selfUpdate is called so the env var is in place.
+	for _, arg := range args {
+		if arg == "--skip-upgrade" {
+			os.Setenv(envNoSelfUpdate, "1")
+			break
+		}
+	}
 
 	// Info commands: no system detection, no self-update, no platform validation.
 	if len(args) > 0 {
@@ -60,11 +71,11 @@ func RunArgs(args []string, stdout io.Writer) error {
 		}
 	}
 
-	if err := ensureCurrentOSSupported(); err != nil {
+	if err := system.EnsureCurrentOSSupported(); err != nil {
 		return err
 	}
 
-	result, err := detectSystem(context.Background())
+	result, err := system.Detect(context.Background())
 	if err != nil {
 		return fmt.Errorf("detect system: %w", err)
 	}
@@ -81,7 +92,7 @@ func RunArgs(args []string, stdout io.Writer) error {
 	}
 
 	if len(args) == 0 {
-		homeDir, err := os.UserHomeDir()
+		homeDir, err := osUserHomeDir()
 		if err != nil {
 			return fmt.Errorf("resolve user home directory: %w", err)
 		}
@@ -184,7 +195,7 @@ func runUpgrade(ctx context.Context, args []string, detection system.DetectionRe
 		}
 	}
 
-	homeDir, err := os.UserHomeDir()
+	homeDir, err := osUserHomeDir()
 	if err != nil {
 		return fmt.Errorf("resolve home directory: %w", err)
 	}
@@ -236,7 +247,7 @@ func tuiExecute(
 	restoreCommandOutput := cli.SetCommandOutputStreaming(false)
 	defer restoreCommandOutput()
 
-	homeDir, err := os.UserHomeDir()
+	homeDir, err := osUserHomeDir()
 	if err != nil {
 		return pipeline.ExecutionResult{Err: fmt.Errorf("resolve user home directory: %w", err)}
 	}
@@ -458,7 +469,7 @@ func modelAssignmentsToState(m map[string]model.ModelAssignment) map[string]stat
 
 // ListBackups returns all backup manifests from the backup directory.
 func ListBackups() []backup.Manifest {
-	homeDir, err := os.UserHomeDir()
+	homeDir, err := osUserHomeDir()
 	if err != nil {
 		return nil
 	}

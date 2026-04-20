@@ -282,10 +282,12 @@ func TestRunRestore_UnknownFlagReturnsError(t *testing.T) {
 
 // --- helpers ---
 
-// restoreHomeDir sets HOME to dir for the duration of the test.
+// restoreHomeDir overrides osUserHomeDir to return dir for the duration of the test.
+// On Windows, os.UserHomeDir() ignores the HOME env var, so we must inject the
+// function variable directly rather than setting an env var.
 func restoreHomeDir(t *testing.T, dir string) {
 	t.Helper()
-	orig := os.Getenv("HOME")
-	t.Cleanup(func() { os.Setenv("HOME", orig) })
-	os.Setenv("HOME", dir)
+	orig := osUserHomeDir
+	t.Cleanup(func() { osUserHomeDir = orig })
+	osUserHomeDir = func() (string, error) { return dir, nil }
 }
