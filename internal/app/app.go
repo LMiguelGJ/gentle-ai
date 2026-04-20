@@ -49,12 +49,15 @@ func RunArgs(args []string, stdout io.Writer) error {
 
 	// Handle --skip-upgrade before any other processing.
 	// This must be done before selfUpdate is called so the env var is in place.
+	filteredArgs := make([]string, 0, len(args))
 	for _, arg := range args {
 		if arg == "--skip-upgrade" {
 			os.Setenv(envNoSelfUpdate, "1")
-			break
+			continue
 		}
+		filteredArgs = append(filteredArgs, arg)
 	}
+	args = filteredArgs
 
 	// Info commands: no system detection, no self-update, no platform validation.
 	if len(args) > 0 {
