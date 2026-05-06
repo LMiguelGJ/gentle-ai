@@ -53,7 +53,7 @@ func NewAdapter(agent model.AgentID) (Adapter, error) {
 }
 
 func NewDefaultRegistry() (*Registry, error) {
-	adapters := make([]Adapter, 0, 12)
+	adapters := make([]Adapter, 0, 13)
 
 	for _, agent := range []model.AgentID{
 		model.AgentClaudeCode,

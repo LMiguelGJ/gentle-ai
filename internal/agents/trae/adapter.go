@@ -133,6 +133,20 @@ func (a *Adapter) SupportsMCP() bool {
 	return true
 }
 
+// --- Sub-agents (not supported on Trae) ---
+
+func (a *Adapter) SupportsSubAgents() bool {
+	return false
+}
+
+func (a *Adapter) SubAgentsDir(_ string) string {
+	return ""
+}
+
+func (a *Adapter) EmbeddedSubAgentsDir() string {
+	return ""
+}
+
 // AgentNotInstallableError is returned when InstallCommand is called on a desktop-only agent.
 type AgentNotInstallableError struct {
 	Agent model.AgentID

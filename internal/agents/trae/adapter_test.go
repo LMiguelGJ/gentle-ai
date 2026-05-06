@@ -93,6 +93,10 @@ func TestConfigPathsCrossPlatform(t *testing.T) {
 		t.Fatalf("MCPConfigPath() = %q, want %q", got, filepath.Join(home, ".trae", "mcp.json"))
 	}
 
+	if got := a.SettingsPath(home); got != filepath.Join(home, ".trae", "settings.json") {
+		t.Fatalf("SettingsPath() = %q, want %q", got, filepath.Join(home, ".trae", "settings.json"))
+	}
+
 	if got := a.SystemPromptFile(home); got != filepath.Join(home, ".trae", "user_rules", "gentle-ai.md") {
 		t.Fatalf("SystemPromptFile() = %q, want %q", got, filepath.Join(home, ".trae", "user_rules", "gentle-ai.md"))
 	}
@@ -128,5 +132,45 @@ func TestAgentNotInstallableError(t *testing.T) {
 	expected := "agent trae is a desktop app and cannot be installed via CLI"
 	if err.Error() != expected {
 		t.Errorf("expected %s, got %s", expected, err.Error())
+	}
+}
+
+func TestSupportsSubAgents(t *testing.T) {
+	a := NewAdapter()
+
+	if a.SupportsSubAgents() {
+		t.Fatalf("SupportsSubAgents() = true, want false (Trae does not support sub-agents)")
+	}
+
+	if got := a.SubAgentsDir("/tmp/home"); got != "" {
+		t.Fatalf("SubAgentsDir() = %q, want %q", got, "")
+	}
+
+	if got := a.EmbeddedSubAgentsDir(); got != "" {
+		t.Fatalf("EmbeddedSubAgentsDir() = %q, want %q", got, "")
+	}
+}
+
+func TestCapabilities(t *testing.T) {
+	a := NewAdapter()
+
+	caps := []struct {
+		name    string
+		got     bool
+		want    bool
+		wantDir string
+	}{
+		{"SupportsOutputStyles", a.SupportsOutputStyles(), false, ""},
+		{"SupportsSlashCommands", a.SupportsSlashCommands(), false, ""},
+		{"SupportsSkills", a.SupportsSkills(), true, ""},
+		{"SupportsSystemPrompt", a.SupportsSystemPrompt(), true, ""},
+		{"SupportsMCP", a.SupportsMCP(), true, ""},
+		{"SupportsSubAgents", a.SupportsSubAgents(), false, ""},
+	}
+
+	for _, c := range caps {
+		if c.got != c.want {
+			t.Errorf("%s() = %v, want %v", c.name, c.got, c.want)
+		}
 	}
 }
