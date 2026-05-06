@@ -49,13 +49,17 @@ func TestDetect(t *testing.T) {
 				},
 			}
 
-			installed, _, configPath, configFound, err := a.Detect(context.Background(), "/tmp/home")
+			installed, binaryPath, configPath, configFound, err := a.Detect(context.Background(), "/tmp/home")
 			if (err != nil) != tt.wantErr {
 				t.Fatalf("Detect() error = %v, wantErr %v", err, tt.wantErr)
 			}
 
 			if tt.wantErr {
 				return
+			}
+
+			if binaryPath != "" {
+				t.Fatalf("Detect() binaryPath = %q, want %q (Trae is desktop app)", binaryPath, "")
 			}
 
 			if installed != tt.wantInstalled {
@@ -127,6 +131,18 @@ func TestDesktopAppNotAutoInstallable(t *testing.T) {
 	}
 }
 
+func TestAgentIdentity(t *testing.T) {
+	a := NewAdapter()
+
+	if got := a.Agent(); got != model.AgentTrae {
+		t.Fatalf("Agent() = %v, want %v", got, model.AgentTrae)
+	}
+
+	if got := a.Tier(); got != model.TierFull {
+		t.Fatalf("Tier() = %v, want %v", got, model.TierFull)
+	}
+}
+
 func TestAgentNotInstallableError(t *testing.T) {
 	err := AgentNotInstallableError{Agent: model.AgentTrae}
 	expected := "agent trae is a desktop app and cannot be installed via CLI"
@@ -155,17 +171,16 @@ func TestCapabilities(t *testing.T) {
 	a := NewAdapter()
 
 	caps := []struct {
-		name    string
-		got     bool
-		want    bool
-		wantDir string
+		name string
+		got  bool
+		want bool
 	}{
-		{"SupportsOutputStyles", a.SupportsOutputStyles(), false, ""},
-		{"SupportsSlashCommands", a.SupportsSlashCommands(), false, ""},
-		{"SupportsSkills", a.SupportsSkills(), true, ""},
-		{"SupportsSystemPrompt", a.SupportsSystemPrompt(), true, ""},
-		{"SupportsMCP", a.SupportsMCP(), true, ""},
-		{"SupportsSubAgents", a.SupportsSubAgents(), false, ""},
+		{"SupportsOutputStyles", a.SupportsOutputStyles(), false},
+		{"SupportsSlashCommands", a.SupportsSlashCommands(), false},
+		{"SupportsSkills", a.SupportsSkills(), true},
+		{"SupportsSystemPrompt", a.SupportsSystemPrompt(), true},
+		{"SupportsMCP", a.SupportsMCP(), true},
+		{"SupportsSubAgents", a.SupportsSubAgents(), false},
 	}
 
 	for _, c := range caps {

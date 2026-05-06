@@ -58,6 +58,7 @@ func TestSetupAgentSlug(t *testing.T) {
 		{model.AgentQwenCode, "", false},
 		{model.AgentCursor, "", false},
 		{model.AgentVSCodeCopilot, "", false},
+		{model.AgentTrae, "trae", true},
 	}
 
 	for _, tt := range tests {
@@ -86,5 +87,8 @@ func TestShouldAttemptSetup(t *testing.T) {
 	}
 	if ShouldAttemptSetup(SetupModeSupported, model.AgentCursor) {
 		t.Fatal("ShouldAttemptSetup(supported, cursor) = true, want false")
+	}
+	if !ShouldAttemptSetup(SetupModeSupported, model.AgentTrae) {
+		t.Fatal("ShouldAttemptSetup(supported, trae) = false, want true")
 	}
 }
