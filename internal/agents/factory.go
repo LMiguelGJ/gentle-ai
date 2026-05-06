@@ -13,6 +13,7 @@ import (
 	"github.com/gentleman-programming/gentle-ai/internal/agents/kiro"
 	"github.com/gentleman-programming/gentle-ai/internal/agents/opencode"
 	"github.com/gentleman-programming/gentle-ai/internal/agents/qwen"
+	"github.com/gentleman-programming/gentle-ai/internal/agents/trae"
 	"github.com/gentleman-programming/gentle-ai/internal/agents/vscode"
 	"github.com/gentleman-programming/gentle-ai/internal/agents/windsurf"
 	"github.com/gentleman-programming/gentle-ai/internal/model"
@@ -44,6 +45,8 @@ func NewAdapter(agent model.AgentID) (Adapter, error) {
 		return qwen.NewAdapter(), nil
 	case model.AgentKiroIDE:
 		return kiro.NewAdapter(), nil
+	case model.AgentTrae:
+		return trae.NewAdapter(), nil
 	default:
 		return nil, AgentNotSupportedError{Agent: agent}
 	}
@@ -65,6 +68,7 @@ func NewDefaultRegistry() (*Registry, error) {
 		model.AgentKimi,
 		model.AgentQwenCode,
 		model.AgentKiroIDE,
+		model.AgentTrae,
 	} {
 		adapter, err := NewAdapter(agent)
 		if err != nil {
