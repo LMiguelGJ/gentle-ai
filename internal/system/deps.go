@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 )
 
 // Dependency represents a system prerequisite with detection and install metadata.
@@ -142,7 +143,11 @@ func detectSingleDep(ctx context.Context, dep Dependency) Dependency {
 	dep.Installed = true
 
 	// Run version command to extract version string.
-	cmd := exec.CommandContext(ctx, dep.DetectCmd[0], dep.DetectCmd[1:]...)
+	// Use a per-command timeout so slow commands (e.g. npm on Windows) don't block startup.
+	cmdCtx, cancel := context.WithTimeout(ctx, 4*time.Second)
+	defer cancel()
+
+	cmd := exec.CommandContext(cmdCtx, dep.DetectCmd[0], dep.DetectCmd[1:]...)
 	out, err := cmd.Output()
 	if err != nil {
 		// Binary exists but version command failed — still mark as installed.
