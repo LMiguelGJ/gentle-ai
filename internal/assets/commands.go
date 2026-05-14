@@ -9,6 +9,8 @@ func SDDCommandsAssetDir(agent model.AgentID) string {
 	switch agent {
 	case model.AgentClaudeCode:
 		return "claude/commands"
+	case model.AgentTrae:
+		return "trae/commands"
 	default:
 		return "opencode/commands"
 	}

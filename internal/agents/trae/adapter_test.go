@@ -176,7 +176,7 @@ func TestCapabilities(t *testing.T) {
 		want bool
 	}{
 		{"SupportsOutputStyles", a.SupportsOutputStyles(), false},
-		{"SupportsSlashCommands", a.SupportsSlashCommands(), false},
+		{"SupportsSlashCommands", a.SupportsSlashCommands(), true},
 		{"SupportsSkills", a.SupportsSkills(), true},
 		{"SupportsSystemPrompt", a.SupportsSystemPrompt(), true},
 		{"SupportsMCP", a.SupportsMCP(), true},
@@ -187,5 +187,13 @@ func TestCapabilities(t *testing.T) {
 		if c.got != c.want {
 			t.Errorf("%s() = %v, want %v", c.name, c.got, c.want)
 		}
+	}
+}
+
+func TestCommandsDir(t *testing.T) {
+	a := NewAdapter()
+	home := "/tmp/home"
+	if got := a.CommandsDir(home); got != filepath.Join(home, ".trae", "commands") {
+		t.Fatalf("CommandsDir() = %q, want %q", got, filepath.Join(home, ".trae", "commands"))
 	}
 }
