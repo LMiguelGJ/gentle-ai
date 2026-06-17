@@ -151,11 +151,33 @@ func (a *Adapter) traeUserDir(homeDir string) string {
 
 func (a *Adapter) SupportsOutputStyles() bool     { return false }
 func (a *Adapter) OutputStyleDir(_ string) string { return "" }
-func (a *Adapter) SupportsSlashCommands() bool    { return false }
-func (a *Adapter) CommandsDir(_ string) string    { return "" }
-func (a *Adapter) SupportsSubAgents() bool        { return false }
-func (a *Adapter) SubAgentsDir(_ string) string   { return "" }
-func (a *Adapter) EmbeddedSubAgentsDir() string   { return "" }
+
+// SupportsSlashCommands is true. Trae loads custom slash commands from
+// `~/.trae/commands/<name>.md` and exposes them in chat autocomplete.
+func (a *Adapter) SupportsSlashCommands() bool { return true }
+
+// CommandsDir returns the Trae slash commands directory.
+func (a *Adapter) CommandsDir(homeDir string) string {
+	return filepath.Join(a.GlobalConfigDir(homeDir), "commands")
+}
+
+// SupportsSubAgents is true. Trae loads Skill files from `~/.trae/skills/<name>/`
+// as callable custom agents. Gentle AI installs SDD phase skills under
+// `~/.trae/skills/sdd-<phase>/SKILL.md` and Judgment Day agents under
+// `~/.trae/skills/jd-<name>/SKILL.md`.
+func (a *Adapter) SupportsSubAgents() bool { return true }
+
+// SubAgentsDir returns the Trae skills directory (Trae uses skills as agents).
+func (a *Adapter) SubAgentsDir(homeDir string) string {
+	return a.SkillsDir(homeDir)
+}
+
+// EmbeddedSubAgentsDir is the embedded assets subdirectory containing
+// Trae custom-agent templates, relative to internal/assets/.
+func (a *Adapter) EmbeddedSubAgentsDir() string {
+	return "trae/agents"
+}
+
 func (a *Adapter) SupportsSkills() bool           { return true }
 func (a *Adapter) SupportsSystemPrompt() bool     { return true }
 func (a *Adapter) SupportsMCP() bool              { return true }

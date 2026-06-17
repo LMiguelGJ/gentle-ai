@@ -224,11 +224,34 @@ func TestCapabilities(t *testing.T) {
 	if a.SupportsOutputStyles() {
 		t.Fatal("Trae should NOT support output styles")
 	}
-	if a.SupportsSlashCommands() {
-		t.Fatal("Trae should NOT support slash commands")
+	// Trae supports both slash commands (~/.trae/commands/) and custom agents
+	// (loaded from ~/.trae/skills/ as Skill files).
+	if !a.SupportsSlashCommands() {
+		t.Fatal("Trae should support slash commands")
 	}
-	if a.SupportsSubAgents() {
-		t.Fatal("Trae should NOT support sub-agents")
+	if !a.SupportsSubAgents() {
+		t.Fatal("Trae should support sub-agents (via Skill files)")
+	}
+}
+
+func TestCommandsAndSubAgentsDirs(t *testing.T) {
+	a := NewAdapter()
+	home := testHome
+
+	wantCommands := filepath.Join(home, ".trae", "commands")
+	if got := a.CommandsDir(home); got != wantCommands {
+		t.Fatalf("CommandsDir() = %q, want %q", got, wantCommands)
+	}
+
+	// Trae uses skills as agents, so SubAgentsDir == SkillsDir.
+	wantSkills := filepath.Join(home, ".trae", "skills")
+	if got := a.SubAgentsDir(home); got != wantSkills {
+		t.Fatalf("SubAgentsDir() = %q, want %q", got, wantSkills)
+	}
+
+	// EmbeddedSubAgentsDir points to the assets directory (relative path).
+	if got := a.EmbeddedSubAgentsDir(); got != "trae/agents" {
+		t.Fatalf("EmbeddedSubAgentsDir() = %q, want %q", got, "trae/agents")
 	}
 }
 
