@@ -80,6 +80,7 @@ func TestConfigPathsCrossPlatform(t *testing.T) {
 	a := NewAdapter()
 	home := testHome
 
+	// ~/.trae/ is the cross-platform root for skills, rules, and MCP.
 	wantGlobal := filepath.Join(home, ".trae")
 	if got := a.GlobalConfigDir(home); got != wantGlobal {
 		t.Fatalf("GlobalConfigDir() = %q, want %q", got, wantGlobal)
@@ -89,9 +90,31 @@ func TestConfigPathsCrossPlatform(t *testing.T) {
 	if got := a.SkillsDir(home); got != wantSkills {
 		t.Fatalf("SkillsDir() = %q, want %q", got, wantSkills)
 	}
+
+	// System prompt lives in ~/.trae/user_rules/gentle-ai.md (a file inside
+	// the user_rules/ directory Trae manages). Cross-platform, not OS-specific.
+	wantSystemPromptDir := filepath.Join(home, ".trae", "user_rules")
+	if got := a.SystemPromptDir(home); got != wantSystemPromptDir {
+		t.Fatalf("SystemPromptDir() = %q, want %q", got, wantSystemPromptDir)
+	}
+
+	wantSystemPromptFile := filepath.Join(home, ".trae", "user_rules", "gentle-ai.md")
+	if got := a.SystemPromptFile(home); got != wantSystemPromptFile {
+		t.Fatalf("SystemPromptFile() = %q, want %q", got, wantSystemPromptFile)
+	}
+
+	// MCP config lives at ~/.trae/mcp.json (Cursor-compatible format).
+	// Trae does NOT use the OS-specific app config dir for MCP.
+	wantMCP := filepath.Join(home, ".trae", "mcp.json")
+	if got := a.MCPConfigPath(home, ""); got != wantMCP {
+		t.Fatalf("MCPConfigPath() = %q, want %q", got, wantMCP)
+	}
 }
 
-func TestOSSpecificPaths(t *testing.T) {
+func TestSettingsPathOSSpecific(t *testing.T) {
+	// Only SettingsPath remains OS-specific — it follows VSCode-style split-root
+	// layout for editor settings.json. Skills, rules, and MCP all live under
+	// the cross-platform ~/.trae/ root (see TestConfigPathsCrossPlatform).
 	a := NewAdapter()
 	home := testHome
 
@@ -150,20 +173,6 @@ func TestOSSpecificPaths(t *testing.T) {
 				t.Setenv("APPDATA", "")
 			}
 
-			gotDir := a.SystemPromptDir(home)
-			if gotDir != tt.wantDir {
-				t.Fatalf("SystemPromptDir() = %q, want %q", gotDir, tt.wantDir)
-			}
-			gotFile := a.SystemPromptFile(home)
-			wantFile := filepath.Join(tt.wantDir, "user_rules.md")
-			if gotFile != wantFile {
-				t.Fatalf("SystemPromptFile() = %q, want %q", gotFile, wantFile)
-			}
-			gotMCP := a.MCPConfigPath(home, "")
-			wantMCP := filepath.Join(tt.wantDir, "mcp.json")
-			if gotMCP != wantMCP {
-				t.Fatalf("MCPConfigPath() = %q, want %q", gotMCP, wantMCP)
-			}
 			gotSettings := a.SettingsPath(home)
 			wantSettings := filepath.Join(tt.wantDir, "settings.json")
 			if gotSettings != wantSettings {
