@@ -178,9 +178,9 @@ func (a *Adapter) EmbeddedSubAgentsDir() string {
 	return "trae/agents"
 }
 
-func (a *Adapter) SupportsSkills() bool           { return true }
-func (a *Adapter) SupportsSystemPrompt() bool     { return true }
-func (a *Adapter) SupportsMCP() bool              { return true }
+func (a *Adapter) SupportsSkills() bool       { return true }
+func (a *Adapter) SupportsSystemPrompt() bool { return true }
+func (a *Adapter) SupportsMCP() bool          { return true }
 
 // AgentNotInstallableError is returned when InstallCommand is called on a desktop-only agent.
 type AgentNotInstallableError struct {
